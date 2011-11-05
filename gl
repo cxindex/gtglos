@@ -1,0 +1,1 @@
+cc -o glutfonts glutfonts.c -lglut -lGLU -lGL -lXmu -lX11 -lm

@@ -1,0 +1,454 @@
+#include "main.h"
+#include "base.h"
+
+#define C_UNIT t1.body //control unit
+#define MAX_CONTACTS 17 //ode callback max cont
+
+static dWorldID world;
+static dSpaceID space;
+static dJointGroupID contactgroup;
+static dJointID plane2d;
+
+int w=1000;
+int h=700;
+int w_f, h_f, x_f, y_f;
+int keystates[256];
+
+base t1, t2;
+base dynbox;
+base right_wall, left_wall;
+base dyn_array[256];
+//~ base *shots_array = (base*)malloc(sizeof(base*5));
+//~ base *shots_array = new base[5];
+//~ base *shots_array;
+
+struct distance_hit{
+	base b;
+	int state;
+} shots_array[6];
+
+static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+{
+	int i;
+	dBodyID b1 = dGeomGetBody(o1);
+	dBodyID b2 = dGeomGetBody(o2);
+	
+	char *gd = 0;
+	gd = (char*) dGeomGetData (o1);
+	//~ gd = (char*) dGeomGetClassData (o2);
+	//~ fprintf(stderr, "%s\n", gd);
+	//~ gd = (char*) dGeomGetData (o2);
+	//~ fprintf(stderr, "%s\n", gd);
+
+	// exit without doing anything if the two bodies are connected by a joint
+	//~ if (b1 && b2 && dAreConnectedExcluding (b1,b2,dJointTypeContact)) return;
+	
+	dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
+	for (i=0; i<MAX_CONTACTS; i++)
+	{
+		contact[i].surface.mode = dContactSoftCFM;
+		//~ contact[i].surface.mode = dContactBounce;
+		
+		contact[i].surface.mu = 17;
+		//~ contact[i].surface.mu = dInfinity;
+		contact[i].surface.bounce = 0.1;
+		contact[i].surface.bounce_vel = 10.5;
+		contact[i].surface.soft_cfm = 0.003;
+	}
+	
+	if(int numc = dCollide (o1, o2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
+	{
+	    //~ dMatrix3 RI;
+	    //~ dRSetIdentity (RI);
+	    //~ const dReal ss[3] = {0.02,0.02,0.02};
+	    for (i=0; i<numc; i++)
+	    {
+			if (dGeomGetClass(o1) == dRayClass || dGeomGetClass(o2) == dRayClass)
+			{
+				dMatrix3 Rotation;
+				dRSetIdentity(Rotation);
+				dVector3 End;
+				
+				End[0] = contact[i].geom.pos[0] + (contact[i].geom.normal[0] * contact[i].geom.depth);
+				End[1] = contact[i].geom.pos[1] + (contact[i].geom.normal[1] * contact[i].geom.depth);
+				End[2] = contact[i].geom.pos[2] + (contact[i].geom.normal[2] * contact[i].geom.depth);
+				End[3] = contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
+				continue;
+			}
+		
+			dJointID c = dJointCreateContact (world, contactgroup, contact+i);
+			dJointAttach (c, b1, b2);
+	    }
+	}
+}
+
+static void simLoop (int pause)
+{
+    dSpaceCollide (space, 0, &nearCallback);      // обнаруживает столкновение и добавляет точку контакта
+    dWorldQuickStep (world, 0.10);               // шаг симуляции и его интервал
+    dJointGroupEmpty (contactgroup);            // удаляет все точки контакта
+}
+
+void add_to_dyn_array(base add)
+{
+	static int to;
+	dyn_array[to++]=add;
+}
+
+void look_at(dBodyID body)
+{//olololo
+	static const dReal *odepos;
+	static dVector3 pointrelvel;
+
+	odepos=dBodyGetPosition(body);
+	dBodyGetRelPointVel(body,0,0,0,pointrelvel);
+	static int x=0;
+	static int w_f=w;
+	static int h_f=h;
+	int scroll=1;
+	int scroll2=2;
+	int scroll3=3;
+
+	if((odepos[0]+400)>w_f)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(x+=scroll, w_f+=scroll, 0, h_f, 100.0, -100.0);
+		if((odepos[0]+300)>w_f)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(x+=scroll2, w_f+=scroll2, 0, h_f, 100.0, -100.0);
+			if((odepos[0]+200)>w_f)
+			{
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				glOrtho(x+=scroll3, w_f+=scroll3, 0, h_f, 100.0, -100.0);
+				if((odepos[0])>w_f)
+				{
+					glMatrixMode(GL_PROJECTION);
+					glLoadIdentity();
+					glOrtho(x+=w, w_f+=w, 0, h_f, 100.0, -100.0);
+				}
+			}
+		}
+
+	}
+	if((odepos[0]-400)<w_f-w)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(x-=scroll, w_f-=scroll, 0, h, 100.0, -100.0);
+		if((odepos[0]-300)<w_f-w)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(x-=scroll2, w_f-=scroll2, 0, h_f, 100.0, -100.0);
+			if((odepos[0]-200)<w_f-w)
+			{
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				glOrtho(x-=scroll3, w_f-=scroll3, 0, h_f, 100.0, -100.0);
+				if((odepos[0])<w_f-w)
+				{
+					glMatrixMode(GL_PROJECTION);
+					glLoadIdentity();
+					glOrtho(x-=w, w_f-=w, 0, h_f, 100.0, -100.0);
+				}
+			}
+		}
+	}
+	::w_f=w_f;
+	::h_f=h_f;
+	::x_f=x;
+}
+
+void hit(const dReal* from, int x, int y)
+{
+	static int n, over;
+	float f0, f1;
+	
+	if(n>=5) { n=0; over=1; }
+	if(over==1){
+		shots_array[n].state=0;
+		//~ dBodyDisable(shots_array[n].b.body);
+		//~ dGeomDisable(shots_array[n].b.geom);
+		//~ free(shots_array[n].b);
+		dBodyDestroy(shots_array[n].b.body);
+		dGeomDestroy(shots_array[n].b.geom);
+		//~ delete shots_array[n].b;
+	}
+	int i ;
+	// if(!over)
+	//~ else
+		//~ shots_array[n].b = new base;
+		
+	shots_array[n].state=3;
+	
+	shots_array[n].b.body = dBodyCreate (world);
+	dJointAttach( plane2d, shots_array[n].b.body, 0 );
+	shots_array[n].b.geom = dCreateSphere (space,18); // / на большую сторону. дописать
+	dMassSetSphere (&shots_array[n].b.m,1,0.5);
+	shots_array[n].b.ode_init();
+	
+	shots_array[n].b.rotatebit=1;
+	shots_array[n].b.ode_init();
+	
+	shots_array[n].b.img_load(36, 36, "sprite/sun.bmp", 1, 0, 0);
+	
+	if(x+::x_f>=from[0])
+	  {
+	    f0=from[0]+40;
+	    dBodyAddForceAtRelPos(shots_array[n].b.body, 100, 0, 0,   0, 100, 0);
+	    //	    dBodyAddForce(shots_array[n].b.body, 400, h*2-y, 0);
+	  }	  
+	else
+	  {
+	    f0=from[0]-40;
+	    dBodyAddForce(shots_array[n].b.body, -400, 0, 0);
+	  }	    
+	//~ fprintf(stderr, "%.3f %.3f\n", from[0], from[1]);
+	//~ fprintf(stderr, "%i %i\n", x+::x_f, y);
+
+	shots_array[n].b.set_pos(f0, from[1]);
+	//~ shots_array[n].b.set_pos(x, y);
+
+	//	dBodyAddForce(shots_array[n].b.body, from[0], h-y, 0);
+	n++;
+}
+
+//--------------------------------- ODE END
+void render_scene(void)
+{
+	static int frames=0, fps=0;
+	static int lastUpdate = 0;
+	static char fpsS[100];
+	
+	int currentTime = glutGet( GLUT_ELAPSED_TIME );
+	frames++;
+	glClear(GL_COLOR_BUFFER_BIT);
+	
+	t1.active_square_render();
+	t2.active_square_render();
+	dynbox.active_square_render();
+	right_wall.passive_square_render();
+	left_wall.passive_square_render();
+	
+	static double lwr;
+	dGeomSetRotation(left_wall.geom, set_eular(lwr++));
+	
+	static int i=0;
+	i=0;
+	while(dyn_array[i].body) dyn_array[i++].active_square_render();
+	//---------------------------------//---------------------------------
+	static int i2=0;
+	i2=0;
+	while(i2!=5)
+	{
+		if(shots_array[i2].state==3)
+			shots_array[i2++].b.active_square_render();
+		else
+			i2++;
+	}
+	
+	//---------------------------------
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glColor4f(0.0, 256.0, 0.0, 256.0);
+	
+	glRasterPos2f(w_f-w+1, h_f-10);
+	char ode[100];
+	sprintf(ode, "T1:ODE// X: %.3f Y: %.3f Z:%.3f", t1.odepos[0], t1.odepos[1], t1.odepos[2]);
+	print_bitmap_string(GLUT_BITMAP_8_BY_13, ode);
+	
+	glRasterPos2f(w_f-w+1, h_f-25);
+	char gl[100];
+	sprintf(gl, "T1:GL// X: %.3f Y: %.3f", t1.x, t1.y);
+	print_bitmap_string(GLUT_BITMAP_8_BY_13, gl);
+
+	glRasterPos2f(w_f-w+1, h_f-40);
+	char dbode[100];
+	sprintf(dbode, "DB:ODE// X: %.3f Y: %.3f Z:%.3f", dynbox.odepos[0], dynbox.odepos[1], dynbox.odepos[2]);
+	print_bitmap_string(GLUT_BITMAP_8_BY_13, dbode);
+	
+	if ( (currentTime - lastUpdate) >= 1000 )
+	{
+		sprintf( fpsS, "GFPS: %i", frames );
+		frames = 0;
+		lastUpdate = currentTime;
+	}
+	glRasterPos2f(w_f-w+1, h_f-55);
+	print_bitmap_string(GLUT_BITMAP_8_BY_13, fpsS);
+	//---------------------------------
+
+	glutSwapBuffers();
+}
+
+void setup_rc(void)
+{
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+void keyboard_func(unsigned char key, int x, int y)
+{
+	if (keystates[(int)key] == 1) keystates[(int)key] = 2;
+	if (keystates[(int)key] == 0) keystates[(int)key] = 1;
+	//~ fprintf(stderr, "%i DOWN\t", (int)key);
+	//~ fprintf(stderr, "%i DOWN\n", keystates[(int)key]);
+
+}
+
+void keyboard_up_func(unsigned char key, int x, int y)
+{
+	keystates[(int)key]=0;
+	//~ fprintf(stderr, "%i UP\t\n", (int)key);
+
+	//~ fprintf(stderr, "%i %i\n", x, y);
+}
+
+void mouse_action(int button, int state, int x, int y)
+{
+	static int to;
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		hit(dBodyGetPosition(C_UNIT), x, y);
+	}
+
+	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+	  dyn_array[to].body = dBodyCreate (world);
+	  dJointAttach (plane2d, dyn_array[to].body, 0);
+	  dyn_array[to].geom = dCreateBox (space, 60, 45, 10);
+	  dMassSetBoxTotal (&dyn_array[to].m,0.9,60,45,10); //work
+	  dyn_array[to].rotatebit=1;
+	  dyn_array[to].ode_init();
+
+	  dyn_array[to].img_load(60, 45, "block.bmp", 1, 0, 2);
+	  dyn_array[to].set_pos(::x_f+x, ::h-y);
+	  to++;
+	}
+}
+
+void mouse_passive_motion(int x, int y)
+{
+	//~ fprintf(stderr, "X: %i Y: %i W_F: %i H_F: %i\n", x, y, w_f, h_f);
+	//~ fprintf(stderr, "X: %i Y: %i\n", ::x_f+x, ::h-y);
+	//~ fprintf(stderr, "X: %i Y: %i\n", t1.x+x, y);
+}
+
+void timer_func(int value)
+{
+	
+	t1.active_control();
+	t2.passive_control();
+	look_at(C_UNIT);
+
+	glutPostRedisplay();
+	simLoop(1);
+	glutTimerFunc(15,timer_func,1);
+	//мб вынести симлуп во вторую тайм_фунц
+
+}
+
+void reshape_window(GLsizei w, GLsizei h)
+{
+	printf("reshape it!\n");
+}
+//--------------------------------- GL END
+
+int main (int argc, char **argv)
+{
+	dInitODE();
+    world = dWorldCreate ();
+    space = dHashSpaceCreate (0);
+	plane2d = dJointCreatePlane2D( world, 0);
+    dWorldSetGravity (world,0,-8,0);
+    dCreatePlane (space,0,1,0,0);
+    contactgroup = dJointGroupCreate (0);
+
+    glutInit (&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE); //glut_rgba set as default
+	glutInitWindowSize(::w, ::h);
+	glutCreateWindow("wut");
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glViewport(0, 0, w, h);
+	glOrtho(0, w, 0, h, 100.0, -100.0); //static
+	
+	glEnable( GL_TEXTURE_2D );
+	glEnable(GL_LINE_SMOOTH);
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//---------------------------------
+		t1.body = dBodyCreate (world);
+		dJointAttach( plane2d, t1.body, 0 );
+	    t1.geom = dCreateSphere (space,18); // / на большую сторону. дописать
+	    dMassSetSphere (&t1.m, 1, 0.5); //coz active_control
+	    //~ dMassSetSphereTotal (&t1.m, 0.4, 18);
+	    t1.ode_init();
+		
+		t1.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
+		t1.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
+		t1.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
+		t1.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
+		t1.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
+		t1.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		t1.set_pos(0,100);
+		t1.speed=100;
+		dGeomSetData (t1.geom, (void*)"hero");
+
+		//---------------------------------
+		
+		dynbox.body = dBodyCreate (world);
+		dJointAttach ( plane2d, dynbox.body, 0 );
+	    dynbox.geom = dCreateBox (space, 60, 45, 10);
+	    dMassSetBoxTotal (&dynbox.m,0.9,60,45,10); //work
+	    //~ dMassSetBox (&dynbox.m,1, 1,1,1); //work
+	    dynbox.rotatebit=1;
+   	    dynbox.ode_init();
+   	    
+		dynbox.img_load(60, 45, "block.bmp", 1, 0, 2);
+	    dynbox.set_pos(-400,900);
+		//---------------------------------
+    
+		t2.body = dBodyCreate (world);
+		dJointAttach( plane2d, t2.body, 0 );
+	    t2.geom = dCreateSphere (space,18); // / на большую сторону. дописать
+	    dMassSetSphere (&t2.m,1,0.5);
+		t2.ode_init();
+	    
+		t2.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
+		t2.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
+		t2.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
+		t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
+		t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
+		t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		t2.set_pos(200,900);
+		t2.speed=100;
+		//---------------------------------
+		
+		right_wall.geom = dCreateBox (space, 400, 300, 10);
+		right_wall.img_load(400, 300, "panel.bmp", 6, 0, 0); //with this == tex. withou == no_tex
+		dGeomSetPosition (right_wall.geom, 400, 90, 0);
+		//---------------------------------
+
+		left_wall.geom = dCreateBox (space, 40, 400, 10);
+		left_wall.img_load(40, 400, "panel.bmp", 3, 0, 0); //with this == texure. withou == no_texture
+		dGeomSetPosition (left_wall.geom, -450, 225, 0);
+		dGeomSetRotation (left_wall.geom, set_eular(59));
+
+		//---------------------------------
+		
+//---------------------------------
+
+	glutTimerFunc(1,timer_func,1);
+	glutDisplayFunc(render_scene);
+	//~ glutReshapeFunc(reshape_window); //void reshape func doesn't make glortho
+	glutKeyboardFunc(keyboard_func);
+	glutKeyboardUpFunc(keyboard_up_func);
+	glutMouseFunc(mouse_action);
+	glutPassiveMotionFunc(mouse_passive_motion);
+
+	setup_rc();
+	glutMainLoop();
+}
