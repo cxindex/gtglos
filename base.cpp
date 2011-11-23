@@ -99,13 +99,13 @@ void base::move(int size, int max)
     if (up) //in up
     {
 		if (size > 0 && pointrelvel[0]<max) dBodyAddForce (body,size/10,0,0);
-		//~ if (size > 0 && pointrelvel[0]<max) dBodyAddTorque (body,size/4, 0, 0);
+//		if (size > 0 && pointrelvel[0]<max) dBodyAddTorque (body,size/4, 0, 0);
 		else if (size < 0 && pointrelvel[0]>-max) dBodyAddForce (body,size/10,0,0);
-		//~ else if (size < 0 && pointrelvel[0]>-max) dBodyAddTorque (body,size,0,0);
+//		else if (size < 0 && pointrelvel[0]>-max) dBodyAddTorque (body,size,0,0);
 	}
 	
-	//~ else
-	//~ {
+	else
+	{
 	if (size > 0 && pointrelvel[0] < max) {
 		//~ dBodyAddForce (body,size,0,0);
 		dBodyAddRelTorque (body, 0, 0, -size*60);
@@ -127,7 +127,7 @@ void base::move(int size, int max)
 		//~ if (size > 0 && pointrelvel[0] < max) dBodyAddForce (body, size,0,0);
 		//~ else if (size < 0 && pointrelvel[0] > -max) dBodyAddForce (body,size,0,0);
 //~ 
-	//~ }
+	}
 }
 
 //all keyboard processing
