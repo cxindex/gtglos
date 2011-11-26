@@ -1,9 +1,9 @@
 #include "main.h"
-
+enum {UP, DOWN, LEFT, RIGHT, UL, UR, UL1, UR1 };
 class base{
 public:
 	const char *str;
-	texture_struct texture[6];
+	texture_struct texture[10];
 	GLfloat x,y;
 	float speed; //set. val >  == speed <
 	float calc_speed; //for calc

@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL_image.h>
-#include <limits.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+//#include <limits.h> //wtf?
 #include <unistd.h>
 #include <time.h>
 #include <math.h>
@@ -24,5 +26,5 @@ extern void print_bitmap_string(void* font, char* s);
 struct texture_struct{
 	GLuint texture;
 	int n, type; //needed number
-	float w,h;
+	float w, h;
 };

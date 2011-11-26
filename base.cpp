@@ -96,6 +96,8 @@ void base::move(int size, int max)
 {
 	//for wall-up i must be a sphere with total-mass, torq in air and in stand, and with force in air
     dBodyGetRelPointVel(body,0,0,0,pointrelvel);
+//	const dReal *tr = dBodyGetTorque(body);
+
     if (up) //in up
     {
 		if (size > 0 && pointrelvel[0]<max) dBodyAddForce (body,size/10,0,0);
@@ -107,13 +109,13 @@ void base::move(int size, int max)
 	else
 	{
 	if (size > 0 && pointrelvel[0] < max) {
-		//~ dBodyAddForce (body,size,0,0);
-		dBodyAddRelTorque (body, 0, 0, -size*60);
+		dBodyAddForce (body,size,0,0);
+//		dBodyAddRelTorque (body, 0, 0, -size*60);
 	}
 		
 		else if (size < 0 && pointrelvel[0] > -max) {
-			//~ dBodyAddForce (body,size,0,0);
-			dBodyAddTorque (body, 0, 0, -size*60);
+			dBodyAddForce (body,size,0,0);
+//			dBodyAddTorque (body, 0, 0, -size*60);
 		}
 
     //~ if (up) //in up
@@ -133,29 +135,49 @@ void base::move(int size, int max)
 //all keyboard processing
 void base::active_control(void)
 {
-	const dReal *odepos;	
+	const dReal *odepos;
+	static int wj;
+	static int dj;
 	if(keystates['d'])
 	{
-		move(30, 100);
+		move(20, 80);
 		//~ dBodySetForce(body, -60, 0, 0);
-		last=3;
+		last=RIGHT;
 		if(keystates['c'])
 			dBodyAddRelForce(body,-100,0,0);
 	}
 	if(keystates['a'])
 	{
 		//~ move(-15,60);
-		move(-30, 100);
+		move(-20, 80);
 
-		last=2;
+		last=LEFT;
 		if(keystates['z'])
 			dBodyAddRelForce(body,100,0,0);
 	}
 	if(keystates[' '])
 	{
 		up=check_state();
-		if (up==0) dBodyAddForce(body,0.0,100.0,0.0);	//if stand
-		else if (up==2) dBodyAddForce(body,0.0,80.0,0.0);		//for dj
+		if (up==0)
+		{
+			dBodyAddForce(body,0.0,100.0,0.0);	//if stand
+			 wj=0;		//can wj
+			 dj=0;		//can dj
+		}
+		
+		if ((last==UL1 || last==UR1) && !wj)
+		{
+			if(last==UL1) dBodyAddForce(body,10.0,200.0,0.0);		//from wall
+			else if(last==UR1) dBodyAddForce(body,-10.0,200.0,0.0);		//from wall
+			printf("SSSS\n");
+
+//			wj=1;
+		}
+		else if (up==2 && !dj)
+		{
+//			dBodyAddForce(body,0.0,180.0,0.0);		//for dj
+			dj=1;
+		}
 	}
 	//---------------------------------
 	float tmp;
@@ -170,10 +192,19 @@ void base::active_control(void)
 	
 	if(up)
 	{
-		if(last==0 || last==2)
-			last=4;
-		if(last==1 || last==3)
-			last=5;
+		char *pd = (char*) dGeomGetData (geom);
+						
+		if(last==UP || last==LEFT || last==UL1)
+			if(pd == (char *)'1' && keystates['a'] && pointrelvel[0] > -1 && pointrelvel[0] < 1){
+				last=UL1;
+			}
+			else last=UL;
+			
+		if(last==DOWN || last==RIGHT || last== UR1)
+ 			if(pd == (char *)'1' && keystates['d'] && pointrelvel[0] > -1 && pointrelvel[0] < 1){
+				last=UR1;
+			}
+			else last=UR;
 	}
 	
 	if(!keystates['a'] && !keystates['d'] && !up)	//idle
@@ -192,6 +223,7 @@ void base::active_control(void)
 	last_prev=last;
 
 		//~ hack_2d();
+	dGeomSetData (geom, (void*)'0');
 
 }
 
@@ -355,6 +387,7 @@ short base::check_state(void)
 		stand++;	
 		if (stand>=1 && c_tmp==0) Dup=1,c_tmp=1;		//if >=1 enable dj
 		if (stand>=10) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
+//		if (stand>=8) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
 		if (Dup==1) Tup=2, Dup=0;
 	}
 	else stand=0;

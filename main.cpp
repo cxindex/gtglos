@@ -10,8 +10,8 @@ dSpaceID space;
 static dJointGroupID contactgroup;
 static dJointID plane2d;
 
-int w_window=1000;
-int h_window=700;
+int w_window=1366;
+int h_window=500;
 int w_func_g, h_func_g, x_shear_g, y_shear_g;
 int keystates[256];
 
@@ -57,20 +57,27 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	for (i=0; i<MAX_CONTACTS; i++)
 	{
 //		contact[i].surface.mode = dContactSoftCFM ;
-		contact[i].surface.mode = dContactSoftCFM | dContactSlip1 | dContactSlip2 ;
+		contact[i].surface.mode = dContactSoftCFM |  dContactSoftERP;
 		//~ contact[i].surface.mu = 17;
 		//~ contact[i].surface.mu = 1;
-		contact[i].surface.slip1 = 1.1;
-		contact[i].surface.slip2 = 1.1;
+//		contact[i].surface.slip1 = 10.1;
+//		contact[i].surface.slip2 = 1000.1;
 
-		contact[i].surface.mu = dInfinity;
-		contact[i].surface.bounce = 0.1;
-		contact[i].surface.bounce_vel = 10.5;
-		contact[i].surface.soft_cfm = 0.003;
+//		contact[i].surface.mu = dInfinity;
+		contact[i].surface.mu = 7;
+//		contact[i].surface.bounce = 0.0;
+//		contact[i].surface.bounce_vel = 0.0;
+		contact[i].surface.soft_cfm = 0.03;
+//		contact[i].surface.soft_cfm = 0.003;
+		contact[i].surface.soft_erp = 0.1;
 	}
 	
 	if(int numc = dCollide (o1, o2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
 	{
+//		printf("D: %s\n", dGeomGetData(o1));
+		dGeomSetData (o1, (void*)'1');
+		dGeomSetData (o2, (void*)'1');
+
 	    //~ dMatrix3 RI;
 	    //~ dRSetIdentity (RI);
 	    //~ const dReal ss[3] = {0.02,0.02,0.02};
@@ -110,6 +117,7 @@ void look_at(dBodyID body)
 	static int old[2];
 	int scroll=0;
 	static int x_shear=0;
+	static int y_shear=0;
 
 	odepos=dBodyGetPosition(body);
 	dBodyGetRelPointVel(body,0,0,0,pointrelvel);
@@ -127,26 +135,45 @@ void look_at(dBodyID body)
 			//	x_shear=-w_window-w_func;
 		}
 		
-		printf("hello");
+		printf("hello W");
 		old[0]=w_window;
 //		old[1]=h_window;
 
 	}
+	
+	if(old[1]!=h_window){
+		// if(w_func>w_window) w_func=-w_window;
+		if(h_func<h_window){
+			h_func=-h_window-old[1]; //w_func=+w_window;
+//			x_shear=-w_window-w_func;
+		}
+		if(h_func>h_window){
+			h_func=-old[0]-h_window; //w_func=+w_window;
+			//	x_shear=-w_window-w_func;
+		}
+		
+		printf("hello H");
+		old[1]=h_window;
+//		old[1]=h_window;
 
-	if((odepos[0]+100)>w_func)
+	}
+	///////
+	if((odepos[0]+250)>w_func)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
+		if (scroll <2) scroll = 3;
+
 		if((odepos[0])>w_func)
 			scroll=w_window*2;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(x_shear+=scroll, w_func+=scroll, 0, h_func, 100.0, -100.0);
-	}
-			
-	if((odepos[0]-100)<w_func-w_window)
+	}	
+	else if((odepos[0]-250)<w_func-w_window)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
+		if (scroll <2) scroll = 3;
 		if((odepos[0])<w_func-w_window)
 			scroll=w_window;
 
@@ -155,9 +182,34 @@ void look_at(dBodyID body)
 		glOrtho(x_shear-=scroll, w_func-=scroll, 0, h_func, 100.0, -100.0);
 	}
 
+	if((odepos[1]+250)>h_func)
+	{
+		scroll=fabsf(pointrelvel[1]/10);
+		if (scroll <2) scroll = 3;
+
+		if((odepos[1])>h_func)
+			scroll=h_window*2;
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(x_shear, w_func, y_shear+=scroll, h_func+=scroll, 100.0, -100.0);
+	}	
+	else if((odepos[1]-50)<h_func-h_window)
+	{
+		scroll=fabsf(pointrelvel[1]/10);
+		if (scroll <2) scroll = 3;
+		if((odepos[1])<h_func-h_window)
+			scroll=h_window;
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(x_shear, w_func, y_shear-=scroll, h_func-=scroll, 100.0, -100.0);
+//		glOrtho(y_shear-=scroll, h_func-=scroll, 0, w_func, 100.0, -100.0);
+	}
 	w_func_g=w_func;
 	h_func_g=h_func;
 	x_shear_g=x_shear;
+	y_shear_g=y_shear;
 }
 
 void hit(const dReal* from, int x, int y)
@@ -225,9 +277,6 @@ void render_scene(void)
 	frames++;
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	t1.active_square_render();
-	t2.active_square_render();
-	dynbox.active_square_render();
 	
 	static int si=0;
 	si=0;
@@ -240,7 +289,10 @@ void render_scene(void)
 	i=0;
 	while(dyn_array[i].body) dyn_array[i++].active_square_render();
 	//---------------------------------//---------------------------------
-
+	dynbox.active_square_render();
+	t2.active_square_render();
+	t1.active_square_render();
+	//приоритетные ниже
 	
 	//---------------------------------
 	//~ glMatrixMode(GL_MODELVIEW);
@@ -310,7 +362,7 @@ void mouse_action(int button, int state, int x, int y)
 	static int to;
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		hit(dBodyGetPosition(C_UNIT), x, y);
+		hit(dBodyGetPosition(C_UNIT), x, y+y_shear_g);
 	}
 
 	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
@@ -318,12 +370,15 @@ void mouse_action(int button, int state, int x, int y)
 	  dyn_array[to].body = dBodyCreate (world);
 	  dJointAttach (plane2d, dyn_array[to].body, 0);
 	  dyn_array[to].geom = dCreateBox (space, 60, 45, 10);
-	  dMassSetBoxTotal (&dyn_array[to].m,0.9,60,45,10); //work
+//	  dMassSetBoxTotal (&dyn_array[to].m,0.9,60,45,10); //work
+	  dMassSetBoxTotal (&dyn_array[to].m,0.6,60,45,10); //work
 	  dyn_array[to].rotatebit=1;
 	  dyn_array[to].ode_init();
 
 	  dyn_array[to].img_load(60, 45, "block.bmp", 1, 0, 2);
-	  dyn_array[to].set_pos(x_shear_g+x, h_window-y);
+	  //why h_f_g? its top edge
+	  dyn_array[to].set_pos(x_shear_g+x, h_func_g-y);
+//	  fprintf(stderr, "s: %i\ny: %i\nh_f: %i\n\n", y_shear_g, y, h_func_g);
 	  to++;
 	}
 }
@@ -359,6 +414,7 @@ void reshape_window(GLsizei w, GLsizei h)
 
 int main (int argc, char **argv)
 {
+
 	dInitODE();
     world = dWorldCreate ();
     space = dHashSpaceCreate (0);
@@ -370,7 +426,7 @@ int main (int argc, char **argv)
     glutInit (&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE); //glut_rgba set as default
 	glutInitWindowSize(w_window, h_window);
-	glutCreateWindow("wut");
+	glutCreateWindow("gtglos");
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, w_window, h_window);
@@ -394,9 +450,11 @@ int main (int argc, char **argv)
 		t1.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
 		t1.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
 		t1.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		t1.img_load(44, 34, "sprite/gasmask/ul1.bmp", 1, 6, 1);
+		t1.img_load(44, 34, "sprite/gasmask/ur1.bmp", 1, 7, 1);
 		t1.set_pos(0,100);
 		t1.speed=100;
-		dGeomSetData (t1.geom, (void*)"hero");
+		dGeomSetData (t1.geom, (void*)'1');
 
 		//---------------------------------
 		
