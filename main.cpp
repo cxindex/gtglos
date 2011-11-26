@@ -10,8 +10,8 @@ dSpaceID space;
 static dJointGroupID contactgroup;
 static dJointID plane2d;
 
-int w_window=1366;
-int h_window=500;
+int w_window=800;
+int h_window=600;
 int w_func_g, h_func_g, x_shear_g, y_shear_g;
 int keystates[256];
 
@@ -124,40 +124,41 @@ void look_at(dBodyID body)
 	static int w_func=old[0]=w_window;
 	static int h_func=old[1]=h_window;
 	
-	if(old[0]!=w_window){
-		// if(w_func>w_window) w_func=-w_window;
-		if(w_func<w_window){
-			w_func=-w_window-old[0]; //w_func=+w_window;
-//			x_shear=-w_window-w_func;
-		}
-		if(w_func>w_window){
-			w_func=-old[0]-w_window; //w_func=+w_window;
-			//	x_shear=-w_window-w_func;
-		}
+// 	if(old[0]!=w_window){
+// 		// if(w_func>w_window) w_func=-w_window;
+// 		if(w_func<w_window){
+// 			w_func=-w_window-old[0]; //w_func=+w_window;
+// //			x_shear=-w_window-w_func;
+// 		}
+// 		if(w_func>w_window){
+// 			w_func=-old[0]-w_window; //w_func=+w_window;
+// 			//	x_shear=-w_window-w_func;
+// 		}
 		
-		printf("hello W");
-		old[0]=w_window;
-//		old[1]=h_window;
+// 		printf("hello W");
+// 		old[0]=w_window;
+// //		old[1]=h_window;
 
-	}
+// 	}
 	
-	if(old[1]!=h_window){
-		// if(w_func>w_window) w_func=-w_window;
-		if(h_func<h_window){
-			h_func=-h_window-old[1]; //w_func=+w_window;
-//			x_shear=-w_window-w_func;
-		}
-		if(h_func>h_window){
-			h_func=-old[0]-h_window; //w_func=+w_window;
-			//	x_shear=-w_window-w_func;
-		}
+// 	if(old[1]!=h_window){
+// 		// if(w_func>w_window) w_func=-w_window;
+// 		if(h_func<h_window){
+// 			h_func=-h_window-old[1]; //w_func=+w_window;
+// //			x_shear=-w_window-w_func;
+// 		}
+// 		if(h_func>h_window){
+// 			h_func=-old[0]-h_window; //w_func=+w_window;
+// 			//	x_shear=-w_window-w_func;
+// 		}
 		
-		printf("hello H");
-		old[1]=h_window;
-//		old[1]=h_window;
+// 		printf("hello H");
+// 		old[1]=h_window;
+// //		old[1]=h_window;
 
-	}
+// 	}
 	///////
+	//x
 	if((odepos[0]+250)>w_func)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
@@ -168,27 +169,28 @@ void look_at(dBodyID body)
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(x_shear+=scroll, w_func+=scroll, 0, h_func, 100.0, -100.0);
+		glOrtho(x_shear+=scroll, w_func+=scroll, y_shear, h_func, 100.0, -100.0);
 	}	
 	else if((odepos[0]-250)<w_func-w_window)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
-		if (scroll <2) scroll = 3;
+		if (scroll <-2) scroll = -3;
 		if((odepos[0])<w_func-w_window)
 			scroll=w_window;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(x_shear-=scroll, w_func-=scroll, 0, h_func, 100.0, -100.0);
+		glOrtho(x_shear-=scroll, w_func-=scroll, y_shear, h_func, 100.0, -100.0);
 	}
 
-	if((odepos[1]+250)>h_func)
+	//y
+	if((odepos[1]+50)>h_func)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
 		if (scroll <2) scroll = 3;
 
-		if((odepos[1])>h_func)
-			scroll=h_window*2;
+		 if((odepos[1])>h_func)
+		 	scroll=h_window;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -197,9 +199,9 @@ void look_at(dBodyID body)
 	else if((odepos[1]-50)<h_func-h_window)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll <2) scroll = 3;
-		if((odepos[1])<h_func-h_window)
-			scroll=h_window;
+		if (scroll <-2) scroll = -3;
+		 if((odepos[1])<h_func-h_window)
+		 	scroll=y_shear_g; //bottom edge
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
