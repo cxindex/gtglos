@@ -187,10 +187,10 @@ void look_at(dBodyID body)
 	if((odepos[1]+50)>h_func)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll <2) scroll = 3;
+		if (scroll == 0) scroll = 2;
 
 		 if((odepos[1])>h_func)
-		 	scroll=h_window;
+		 	scroll=h_window-60;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -199,14 +199,14 @@ void look_at(dBodyID body)
 	else if((odepos[1]-50)<h_func-h_window)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll <-2) scroll = -3;
+		if (scroll == 0) scroll = 2;
+		
 		 if((odepos[1])<h_func-h_window)
-		 	scroll=y_shear_g; //bottom edge
+		 	scroll=y_shear_g+60; //bottom edge
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(x_shear, w_func, y_shear-=scroll, h_func-=scroll, 100.0, -100.0);
-//		glOrtho(y_shear-=scroll, h_func-=scroll, 0, w_func, 100.0, -100.0);
 	}
 	w_func_g=w_func;
 	h_func_g=h_func;
