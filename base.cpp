@@ -160,9 +160,7 @@ void base::active_control(void)
 		up=check_state();
 		if (up==0)
 		{
-			dBodyGetRelPointVel(body,0,0,0,pointrelvel);
-			dBodyAddForce(body,0.0,-pointrelvel[1],0.0);	//reset cuz of inertia
-			dBodyAddForce(body,0.0,100.0,0.0);	//if stand
+			dBodyAddForce(body,0.0,40.0,0.0);	//if stand
 			wj=0;		//can wj
 			dj=0;		//can dj
 		}
