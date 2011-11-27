@@ -31,9 +31,6 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b1 = dGeomGetBody(o1);
 	dBodyID b2 = dGeomGetBody(o2);
 	
-	dGeomSetData (o1, (void*)'0');
-	dGeomSetData (o2, (void*)'0');
-
 	char *gd = 0;
 	gd = (char*) dGeomGetData (o1);
 	
@@ -49,7 +46,9 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	
 	if(int numc = dCollide (o1, o2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
 	{
-
+		dGeomSetData (o1, (void*)'1');
+		dGeomSetData (o2, (void*)'1');
+		
 	    for (i=0; i<numc; i++)
 	    {
 			if (dGeomGetClass(o1) == dRayClass || dGeomGetClass(o2) == dRayClass)
@@ -64,39 +63,6 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				End[3] = contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
 				continue;
 			}
-			
-			double t =  contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
-			float f =  contact[i].geom.normal[0];
-			float f1 =  contact[i].geom.normal[1];
-			//s - stand, c - contact
-			// 1 - down
-			if ( f >= -0.5 && f <= 0.5){
-				if( f1 > 0.0 && f1 <= 2 ) { //!=-1
-					printf("SET\n");
-					dGeomSetData (o1, (void*)'s');
-					dGeomSetData (o2, (void*)'s');
-				}
-			
-				if( f1 >= -2  && f1 < -0.0 ) { //!=1
-					printf("222SET\n");
-					dGeomSetData (contact[i].geom.g2, (void*)'s');
-					dGeomSetData (contact[i].geom.g1, (void*)'c');
-//					dGeomSetData (o2, (void*)'c');
-				}
-			}
-			fprintf(stderr, "F:%.9f\n", f);
-			fprintf(stderr, "F1:%.3f\n\n", f1);
-				
-//			fprintf(stderr, "X:%i\n", f);
-//			f =  contact[i].geom.normal[0];
-//			fprintf(stderr, "Y:%i\n\n", f1);
-
-//			fprintf(stderr, "test\n");
-
-//			fprintf(stderr, "pos0: %i\n", contact[i].geom.pos[0] + (contact[i].geom.normal[0] * contact[i].geom.depth));
-			// fprintf(stderr, "pos0: %i\n", contact[i].geom.pos[2]);
-			// fprintf(stderr, "dep: %i\n", contact[i].geom.depth);
-			// fprintf(stderr, "norm0: %i\n\n", contact[i].geom.normal[0]);
 			dJointID c = dJointCreateContact (world, contactgroup, contact+i);
 			dJointAttach (c, b1, b2);
 			

@@ -384,30 +384,24 @@ void base::passive_square_render (void)
 short base::check_state(void)
 {
 	dBodyGetRelPointVel (body, 0, 0, 0, pointrelvel);
-	char *pd = (char*) dGeomGetData (geom);
-	if (pd == (char *)'s'){ Tup=0, Dup=0, c_tmp=0; printf("!\n");}
-	if (pd == (char *)'0'){ Tup=1, Dup=0; printf("0\n");}
-			
-// 	if (pointrelvel[1] > -1 && pointrelvel[1] < 1)
-// 	{
-// 		stand++;	
-// //		if (stand>=1 && c_tmp==0) Dup=1,c_tmp=1;		//if >=1 enable dj
+	if (pointrelvel[1] > -1 && pointrelvel[1] < 1)
+	{
+		stand++;	
+		if (stand>=1 && c_tmp==0) Dup=1,c_tmp=1;		//if >=1 enable dj
+		if (stand>=10) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
+		if (Dup==1) Tup=2, Dup=0;
+	}
+	else stand=0;
 
-// //		if (stand>=10) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
-// //		if (Dup==1) Tup=2, Dup=0;
-// 	}
-// 	else stand=0;
-
-// 	dBodyGetRelPointVel(body,0,0,0,pointrelvel);
-// 	if (pointrelvel[1] > 1 || pointrelvel[1] < -1)
-// 	{
-// 		fly++;
-// //		if (fly>=3) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
-
-// //		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
-// 	}
-// 	else fly=0;
-// //test	
+	dBodyGetRelPointVel(body,0,0,0,pointrelvel);
+	if (pointrelvel[1] > 1 || pointrelvel[1] < -1)
+	{
+		fly++;
+//		if (fly>=3) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
+		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
+	}
+	else fly=0;
+//test	
 	return Tup;	//1 - first j. 2- dj. 0 - floor
 }
 
