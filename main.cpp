@@ -31,22 +31,24 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b1 = dGeomGetBody(o1);
 	dBodyID b2 = dGeomGetBody(o2);
 	
+	dGeomSetData (o1, (void*)'0');
+	dGeomSetData (o2, (void*)'0');
+
 	char *gd = 0;
 	gd = (char*) dGeomGetData (o1);
+	
 	
 	dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
 	for (i=0; i<MAX_CONTACTS; i++)
 	{
 		contact[i].surface.mode = dContactSoftCFM |  dContactSoftERP;
 		contact[i].surface.mu = 5;
-		contact[i].surface.soft_cfm = 0.03;
+		contact[i].surface.soft_cfm = 0.02;
 		contact[i].surface.soft_erp = 0.1;
 	}
 	
 	if(int numc = dCollide (o1, o2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
 	{
-		dGeomSetData (o1, (void*)'1');
-		dGeomSetData (o2, (void*)'1');
 
 	    for (i=0; i<numc; i++)
 	    {
@@ -62,7 +64,39 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				End[3] = contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
 				continue;
 			}
-		
+			
+			double t =  contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
+			float f =  contact[i].geom.normal[0];
+			float f1 =  contact[i].geom.normal[1];
+			//s - stand, c - contact
+			// 1 - down
+			if ( f >= -0.5 && f <= 0.5){
+				if( f1 > 0.0 && f1 <= 2 ) { //!=-1
+					printf("SET\n");
+					dGeomSetData (o1, (void*)'s');
+					dGeomSetData (o2, (void*)'s');
+				}
+			
+				if( f1 >= -2  && f1 < -0.0 ) { //!=1
+					printf("222SET\n");
+					dGeomSetData (contact[i].geom.g2, (void*)'s');
+//					dGeomSetData (contact[i].geom.g1, (void*)'s');
+//					dGeomSetData (o2, (void*)'c');
+				}
+			}
+			fprintf(stderr, "F:%.9f\n", f);
+			fprintf(stderr, "F1:%.3f\n\n", f1);
+				
+//			fprintf(stderr, "X:%i\n", f);
+//			f =  contact[i].geom.normal[0];
+//			fprintf(stderr, "Y:%i\n\n", f1);
+
+//			fprintf(stderr, "test\n");
+
+//			fprintf(stderr, "pos0: %i\n", contact[i].geom.pos[0] + (contact[i].geom.normal[0] * contact[i].geom.depth));
+			// fprintf(stderr, "pos0: %i\n", contact[i].geom.pos[2]);
+			// fprintf(stderr, "dep: %i\n", contact[i].geom.depth);
+			// fprintf(stderr, "norm0: %i\n\n", contact[i].geom.normal[0]);
 			dJointID c = dJointCreateContact (world, contactgroup, contact+i);
 			dJointAttach (c, b1, b2);
 			
@@ -95,7 +129,7 @@ void look_at(dBodyID body)
 	if((odepos[0]+250)>w_func)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
-		if (scroll == 0) scroll = 2;
+		if (scroll == 0) scroll = 4;
 
 		if((odepos[0])>w_func)
 			scroll=w_window-60;
@@ -107,7 +141,7 @@ void look_at(dBodyID body)
 	else if((odepos[0]-250)<w_func-w_window)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
-		if (scroll == 0) scroll = 2;
+		if (scroll == 0) scroll = 4;
 		
 		if((odepos[0])<w_func-w_window)
 			scroll=w_window-60;
@@ -121,7 +155,7 @@ void look_at(dBodyID body)
 	if((odepos[1]+50)>h_func)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll == 0) scroll = 2;
+		if (scroll == 0) scroll = 4;
 		
 		 if((odepos[1])>h_func)
 		 	scroll=h_window-60;
@@ -133,7 +167,7 @@ void look_at(dBodyID body)
 	else if((odepos[1]-50)<h_func-h_window)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll == 0) scroll = 2;
+		if (scroll == 0) scroll = 4;
 
 		 if((odepos[1])<h_func-h_window)
 		 	scroll=h_window-60; //bottom edge
@@ -225,8 +259,8 @@ void render_scene(void)
 	i=0;
 	while(dyn_array[i].body) dyn_array[i++].active_square_render();
 	//---------------------------------//---------------------------------
-	dynbox.active_square_render();
-	t2.active_square_render();
+//	dynbox.active_square_render();
+//	t2.active_square_render();
 	t1.active_square_render();
 	//приоритетные ниже
 	
@@ -293,7 +327,7 @@ void timer_func(int value)
 {
 	
 	t1.active_control();
-	t2.passive_control();
+//	t2.passive_control();
 	look_at(C_UNIT);
 
 	glutPostRedisplay();
@@ -349,31 +383,31 @@ int main (int argc, char **argv)
 		t1.speed=100;
 		//---------------------------------
 		
-		dynbox.body = dBodyCreate (world);
-		dJointAttach ( plane2d, dynbox.body, 0 );
-	    dynbox.geom = dCreateBox (space, 60, 45, 10);
-	    dMassSetBoxTotal (&dynbox.m,0.9, 60, 45, 10); //work
-	    dynbox.rotatebit=1;
-   	    dynbox.ode_init();
+		// dynbox.body = dBodyCreate (world);
+		// dJointAttach ( plane2d, dynbox.body, 0 );
+	    // dynbox.geom = dCreateBox (space, 60, 45, 10);
+	    // dMassSetBoxTotal (&dynbox.m,0.9, 60, 45, 10); //work
+	    // dynbox.rotatebit=1;
+   	    // dynbox.ode_init();
    	    
-		dynbox.img_load(60, 45, "block.bmp", 1, 0, 2);
-	    dynbox.set_pos(-400,900);
+		// dynbox.img_load(60, 45, "block.bmp", 1, 0, 2);
+	    // dynbox.set_pos(-400,900);
 		//---------------------------------
     
-		t2.body = dBodyCreate (world);
-		dJointAttach( plane2d, t2.body, 0 );
-	    t2.geom = dCreateSphere (space,18); // / на большую сторону. дописать
-	    dMassSetSphere (&t2.m,1,0.5);
-		t2.ode_init();
+		// t2.body = dBodyCreate (world);
+		// dJointAttach( plane2d, t2.body, 0 );
+	    // t2.geom = dCreateSphere (space,18); // / на большую сторону. дописать
+	    // dMassSetSphere (&t2.m,1,0.5);
+		// t2.ode_init();
 	    
-		t2.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
-		t2.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
-		t2.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
-		t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
-		t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
-		t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
-		t2.set_pos(200,900);
-		t2.speed=100;
+		// t2.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
+		// t2.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
+		// t2.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
+		// t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
+		// t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
+		// t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		// t2.set_pos(200,900);
+		// t2.speed=100;
 		//---------------------------------
 		make_world_conf("1.conf", stat_array);
 //---------------------------------
