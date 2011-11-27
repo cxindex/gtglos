@@ -80,7 +80,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				if( f1 >= -2  && f1 < -0.0 ) { //!=1
 					printf("222SET\n");
 					dGeomSetData (contact[i].geom.g2, (void*)'s');
-//					dGeomSetData (contact[i].geom.g1, (void*)'s');
+					dGeomSetData (contact[i].geom.g1, (void*)'c');
 //					dGeomSetData (o2, (void*)'c');
 				}
 			}
