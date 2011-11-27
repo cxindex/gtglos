@@ -160,7 +160,7 @@ void base::active_control(void)
 		up=check_state();
 		if (up==0)
 		{
-			dBodyAddForce(body,0.0,100.0,0.0);	//if stand
+			dBodyAddForce(body,0.0,40.0,0.0);	//if stand
 			 wj=0;		//can wj
 			 dj=0;		//can dj
 		}
@@ -387,7 +387,6 @@ short base::check_state(void)
 		stand++;	
 		if (stand>=1 && c_tmp==0) Dup=1,c_tmp=1;		//if >=1 enable dj
 		if (stand>=10) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
-//		if (stand>=8) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
 		if (Dup==1) Tup=2, Dup=0;
 	}
 	else stand=0;
@@ -396,7 +395,8 @@ short base::check_state(void)
 	if (pointrelvel[1] > 1 || pointrelvel[1] < -1)
 	{
 		fly++;
-		if (fly>=3) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
+//		if (fly>=3) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
+		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
 	}
 	else fly=0;
 	

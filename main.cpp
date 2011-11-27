@@ -64,7 +64,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 //		contact[i].surface.slip2 = 1000.1;
 
 //		contact[i].surface.mu = dInfinity;
-		contact[i].surface.mu = 7;
+//		contact[i].surface.mu = 7;
+		contact[i].surface.mu = 5;
 //		contact[i].surface.bounce = 0.0;
 //		contact[i].surface.bounce_vel = 0.0;
 		contact[i].surface.soft_cfm = 0.03;
@@ -162,10 +163,10 @@ void look_at(dBodyID body)
 	if((odepos[0]+250)>w_func)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
-		if (scroll <2) scroll = 3;
+		if (scroll == 0) scroll = 2;
 
 		if((odepos[0])>w_func)
-			scroll=w_window*2;
+			scroll=w_window-60;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -174,9 +175,10 @@ void look_at(dBodyID body)
 	else if((odepos[0]-250)<w_func-w_window)
 	{
 		scroll=fabsf(pointrelvel[0]/10);
-		if (scroll <-2) scroll = -3;
+		if (scroll == 0) scroll = 2;
+		
 		if((odepos[0])<w_func-w_window)
-			scroll=w_window;
+			scroll=w_window-60;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -186,8 +188,9 @@ void look_at(dBodyID body)
 	//y
 	if((odepos[1]+50)>h_func)
 	{
-		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll == 0) scroll = 2;
+		// scroll=fabsf(pointrelvel[1]/10);
+		// if (scroll == 0) scroll = 2;
+		scroll=0;
 
 		 if((odepos[1])>h_func)
 		 	scroll=h_window-60;
@@ -198,11 +201,12 @@ void look_at(dBodyID body)
 	}	
 	else if((odepos[1]-50)<h_func-h_window)
 	{
-		scroll=fabsf(pointrelvel[1]/10);
-		if (scroll == 0) scroll = 2;
-		
+		// scroll=fabsf(pointrelvel[1]/10);
+		// if (scroll == 0) scroll = 2;
+		scroll=0;
 		 if((odepos[1])<h_func-h_window)
-		 	scroll=y_shear_g+60; //bottom edge
+		 	scroll=h_window-60; //bottom edge
+//		 	scroll=y_shear_g+60; //bottom edge
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
