@@ -164,6 +164,7 @@ void base::active_control(void)
 			wj=0;		//can wj
 			dj=0;		//can dj
 		}
+		//test
 		
 		if ((last==UL1 || last==UR1) && !wj)
 		{
