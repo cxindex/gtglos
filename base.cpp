@@ -399,7 +399,7 @@ short base::check_state(void)
 		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
 	}
 	else fly=0;
-	
+//test	
 	return Tup;	//1 - first j. 2- dj. 0 - floor
 }
 
