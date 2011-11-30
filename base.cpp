@@ -164,7 +164,6 @@ void base::active_control(void)
 			wj=0;		//can wj
 			dj=0;		//can dj
 		}
-		//test
 		
 		if ((last==UL1 || last==UR1) && !wj)
 		{
@@ -269,6 +268,14 @@ void base::passive_control(void)
 
 void base::active_square_render (void)
 { //with frame-animation, but without set-type img
+	int *gb;
+	if (body){
+		gb = (int*) dBodyGetData (body);
+//		printf("GET %i\n", (int*)gb);
+		if (gb <= (int*)900 ) printf("DEAD\n");
+	}
+
+	
 	if(body) odepos=dBodyGetPosition(body);
 	else odepos=dGeomGetPosition(geom);
 	x=odepos[0]-texture[last].w/2; //is it needed?

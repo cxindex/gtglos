@@ -31,8 +31,14 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b1 = dGeomGetBody(o1);
 	dBodyID b2 = dGeomGetBody(o2);
 	
-	char *gd = 0;
-	gd = (char*) dGeomGetData (o1);
+	int *gb;
+	if (b1)	gb = (int*) dBodyGetData (b1);
+	int *gb1;
+	if (b2) gb1 = (int*) dBodyGetData (b2);
+
+//	if (b2){ gb = (int*) dBodyGetData (b2);
+//		printf("GB2: %i\n", (int*)gb);
+//	}
 	
 	
 	dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
@@ -63,10 +69,23 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				End[3] = contact[i].geom.pos[3] + (contact[i].geom.normal[3] * contact[i].geom.depth);
 				continue;
 			}
+
 			dJointID c = dJointCreateContact (world, contactgroup, contact+i);
 			dJointAttach (c, b1, b2);
 			
 	    }
+		float depth = contact[0].geom.depth;
+		if (depth != 10 && depth >= 4 )
+		{
+			if (b1){
+				dBodySetData(b1,(void*)((int*)gb - (int)depth));
+				printf("GB: %i\n", (int*)gb);
+			}
+			if (b2){
+				dBodySetData(b2,(void*)((int*)gb1 - (int)depth));
+				printf("GB1: %i\n", (int*)gb1);
+			}
+		}
 	}
 }
 
@@ -173,7 +192,8 @@ void hit(const dReal* from, int x, int y)
 	shots_array[n].b.body = dBodyCreate (world);
 	dJointAttach( plane2d, shots_array[n].b.body, 0 );
 	shots_array[n].b.geom = dCreateSphere (space,18); // / на большую сторону. дописать
-	dMassSetSphere (&shots_array[n].b.m,1,0.5);
+//	dMassSetSphere (&shots_array[n].b.m,1,0.5);
+	dMassSetSphere (&shots_array[n].b.m,1,0.4);
 	shots_array[n].b.ode_init();
 	
 	shots_array[n].b.rotatebit=1;
@@ -184,13 +204,14 @@ void hit(const dReal* from, int x, int y)
 	if(x+::x_shear_g>=from[0])
 	{
 		f0=from[0]+40;
-		dBodyAddForceAtRelPos(shots_array[n].b.body, 100, 0, 0,   0, 100, 0);
-		//	    dBodyAddForce(shots_array[n].b.body, 400, h*2-y, 0);
+//	    dBodyAddForce(shots_array[n].b.body, 500, h_window - y, 0);
+	    dBodyAddForce(shots_array[n].b.body, w_window - x, h_window - y, 0);
+		printf("Y:%i\n", y);
 	}	  
 	else
 	{
 	    f0=from[0]-40;
-	    dBodyAddForce(shots_array[n].b.body, -400, 0, 0);
+	    dBodyAddForce(shots_array[n].b.body, -w_window - x, h_window - y, 0);
 	}	    
 	//~ fprintf(stderr, "%.3f %.3f\n", from[0], from[1]);
 	//~ fprintf(stderr, "%i %i\n", x+::x_f, y);
@@ -226,7 +247,7 @@ void render_scene(void)
 	while(dyn_array[i].body) dyn_array[i++].active_square_render();
 	//---------------------------------//---------------------------------
 //	dynbox.active_square_render();
-//	t2.active_square_render();
+	t2.active_square_render();
 	t1.active_square_render();
 	//приоритетные ниже
 	
@@ -293,7 +314,7 @@ void timer_func(int value)
 {
 	
 	t1.active_control();
-//	t2.passive_control();
+	t2.passive_control();
 	look_at(C_UNIT);
 
 	glutPostRedisplay();
@@ -345,8 +366,9 @@ int main (int argc, char **argv)
 		t1.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
 		t1.img_load(44, 34, "sprite/gasmask/ul1.bmp", 1, 6, 1);
 		t1.img_load(44, 34, "sprite/gasmask/ur1.bmp", 1, 7, 1);
-		t1.set_pos(0,100);
+		t1.set_pos(-30,100);
 		t1.speed=100;
+		dBodySetData (t1.body, (void*)1000);
 		//---------------------------------
 		
 		// dynbox.body = dBodyCreate (world);
@@ -360,20 +382,21 @@ int main (int argc, char **argv)
 	    // dynbox.set_pos(-400,900);
 		//---------------------------------
     
-		// t2.body = dBodyCreate (world);
-		// dJointAttach( plane2d, t2.body, 0 );
-	    // t2.geom = dCreateSphere (space,18); // / на большую сторону. дописать
-	    // dMassSetSphere (&t2.m,1,0.5);
-		// t2.ode_init();
+		t2.body = dBodyCreate (world);
+		dJointAttach( plane2d, t2.body, 0 );
+	    t2.geom = dCreateSphere (space,18); // / на большую сторону. дописать
+	    dMassSetSphere (&t2.m,1,0.5);
+		t2.ode_init();
 	    
-		// t2.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
-		// t2.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
-		// t2.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
-		// t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
-		// t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
-		// t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
-		// t2.set_pos(200,900);
-		// t2.speed=100;
+		t2.img_load(56, 39, "sprite/gasmask/standl.bmp", 2, 0, 1);
+		t2.img_load(56, 39, "sprite/gasmask/standr.bmp", 2, 1, 1);
+		t2.img_load(224, 37, "sprite/gasmask/runl.bmp", 8, 2, 1);
+		t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
+		t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
+		t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		t2.set_pos(200,900);
+		t2.speed=100;
+		dBodySetData (t2.body, (void*)1000);
 		//---------------------------------
 		make_world_conf("1.conf", stat_array);
 //---------------------------------
