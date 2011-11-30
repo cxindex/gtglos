@@ -272,7 +272,7 @@ void base::active_square_render (void)
 	if (body){
 		gb = (int*) dBodyGetData (body);
 //		printf("GET %i\n", (int*)gb);
-		if (gb <= (int*)900 ) printf("DEAD\n");
+		if (gb <= (int*) 1000 ) printf("DEAD\n");
 	}
 
 	

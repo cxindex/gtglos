@@ -32,13 +32,10 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b2 = dGeomGetBody(o2);
 	
 	int *gb;
+	dVector3 pr;
 	if (b1)	gb = (int*) dBodyGetData (b1);
 	int *gb1;
 	if (b2) gb1 = (int*) dBodyGetData (b2);
-
-//	if (b2){ gb = (int*) dBodyGetData (b2);
-//		printf("GB2: %i\n", (int*)gb);
-//	}
 	
 	
 	dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
@@ -75,7 +72,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 			
 	    }
 		float depth = contact[0].geom.depth;
-		if (depth != 10 && depth >= 4 )
+		if (depth != 10 && depth >= 4 && gb >= (int*)1000)
 		{
 			if (b1){
 				dBodySetData(b1,(void*)((int*)gb - (int)depth));
@@ -83,7 +80,7 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 			}
 			if (b2){
 				dBodySetData(b2,(void*)((int*)gb1 - (int)depth));
-				printf("GB1: %i\n", (int*)gb1);
+//				printf("GB1: %i\n", (int*)gb1);
 			}
 		}
 	}
@@ -368,7 +365,7 @@ int main (int argc, char **argv)
 		t1.img_load(44, 34, "sprite/gasmask/ur1.bmp", 1, 7, 1);
 		t1.set_pos(-30,100);
 		t1.speed=100;
-		dBodySetData (t1.body, (void*)1000);
+		dBodySetData (t1.body, (void*)2000);
 		//---------------------------------
 		
 		// dynbox.body = dBodyCreate (world);
@@ -396,7 +393,7 @@ int main (int argc, char **argv)
 		t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
 		t2.set_pos(200,900);
 		t2.speed=100;
-		dBodySetData (t2.body, (void*)1000);
+		dBodySetData (t2.body, (void*)2000);
 		//---------------------------------
 		make_world_conf("1.conf", stat_array);
 //---------------------------------

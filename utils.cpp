@@ -100,7 +100,7 @@ void make_world_conf(const char *config_path, base *wall_array)
 				h = config_setting_get_int (idx);
 				printf("H:%i\n", h);
 				wall_array[i].geom = dCreateBox (space, w, h, 10);
-				wall_array[i].img_load(w, h, "panel.bmp", 3, 0, 0); //with this == texure. withou == no_texture
+				wall_array[i].img_load(w, h, "panel.bmp", 4, 0, 0); //with this == texure. withou == no_texture
 			}
 			else if(!strcmp(setting_name, "x"))
 			{
