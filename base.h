@@ -1,5 +1,5 @@
 #include "main.h"
-enum {UP, DOWN, LEFT, RIGHT, UL, UR, UL1, UR1 };
+enum {UP, DOWN, LEFT, RIGHT, UL, UR, UL1, UR1, DL };
 class base{
 public:
 	const char *str;
@@ -9,7 +9,7 @@ public:
 	float calc_speed; //for calc
 	short last, up;	//last status. 0 standl ,1 standr, 2l,3r
 	float rotate_angle;
-	static int bitd;
+	int bitd;
 
 	
 	//ode

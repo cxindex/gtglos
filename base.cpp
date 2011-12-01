@@ -135,6 +135,7 @@ void base::move(int size, int max)
 //all keyboard processing
 void base::active_control(void)
 {
+if(!bitd){
 	const dReal *odepos;
 	static int wj;
 	static int dj;
@@ -224,7 +225,7 @@ void base::active_control(void)
 
 		//~ hack_2d();
 	dGeomSetData (geom, (void*)'0');
-
+}	
 }
 
 void base::passive_control(void)
@@ -268,12 +269,31 @@ void base::passive_control(void)
 
 void base::active_square_render (void)
 { //with frame-animation, but without set-type img
+	int *gb;
+	if (!bitd){
 
+		gb = (int*) dBodyGetData (body);
+//		printf("GET %i\n", (int*)gb);
+		if (gb <= (int*) 1000 && gb != (int*) 0 ){
+			printf("DEAD\n");
+			if(!bitd){
+//				dBodyDestroy(body);
+//				dGeomDestroy(geom);
+				bitd=1;
+			}
+		}
+	} else {
+		last=DL;
+		translated_val=0;
+	}
 	
 	if(body) odepos=dBodyGetPosition(body);
 	else if(geom) odepos=dGeomGetPosition(geom);
+	
 	x=odepos[0]-texture[last].w/2; //is it needed?
 	y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
+	
+
 	
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
@@ -284,7 +304,7 @@ void base::active_square_render (void)
 	glTranslated(-translated_val, 0, 0);
 	glScalef(-(float)1/texture[last].n, 1.0f, 1.0f);
 	invers----------------------------- */
-//here set dead-texture	
+	
 	glBindTexture( GL_TEXTURE_2D, texture[last].texture );
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -317,20 +337,6 @@ void base::active_square_render (void)
 		glVertex3f( 0.f, texture[last].h, 0.f );
 	glEnd();
 	if(body)hack_2d();
-	int *gb;
-	if (body){
-		gb = (int*) dBodyGetData (body);
-//		printf("GET %i\n", (int*)gb);
-		if (gb <= (int*) 1000 ){
-			printf("DEAD\n");
-			if(!bitd){
-				dBodyDestroy(body);
-				dGeomDestroy(geom);
-				bitd=1;
-			}
-		}
-	}
-	
 }
 
 void base::passive_square_render (void)

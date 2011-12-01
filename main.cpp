@@ -362,6 +362,7 @@ int main (int argc, char **argv)
 		t1.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
 		t1.img_load(44, 34, "sprite/gasmask/ul1.bmp", 1, 6, 1);
 		t1.img_load(44, 34, "sprite/gasmask/ur1.bmp", 1, 7, 1);
+		t1.img_load(43, 16, "sprite/gasmask/dl.bmp", 1, 8, 1);
 		t1.set_pos(-30,100);
 		t1.speed=100;
 		dBodySetData (t1.body, (void*)2000);
@@ -390,6 +391,9 @@ int main (int argc, char **argv)
 		t2.img_load(224, 37, "sprite/gasmask/runr.bmp", 8, 3, 1);
 		t2.img_load(150, 24, "sprite/gasmask/jumpl.bmp", 6, 4, 1);
 		t2.img_load(150, 24, "sprite/gasmask/jumpr.bmp", 6, 5, 1);
+		t2.img_load(44, 34, "sprite/gasmask/ul1.bmp", 1, 6, 1);
+		t2.img_load(44, 34, "sprite/gasmask/ur1.bmp", 1, 7, 1);
+		t2.img_load(43, 16, "sprite/gasmask/dl.bmp", 1, 8, 1);
 		t2.set_pos(200,900);
 		t2.speed=100;
 		dBodySetData (t2.body, (void*)2000);
