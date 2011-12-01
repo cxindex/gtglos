@@ -32,7 +32,6 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b2 = dGeomGetBody(o2);
 	
 	int *gb;
-	dVector3 pr;
 	if (b1)	gb = (int*) dBodyGetData (b1);
 	int *gb1;
 	if (b2) gb1 = (int*) dBodyGetData (b2);

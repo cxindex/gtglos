@@ -95,7 +95,7 @@ void base::ode_init(void)
 void base::move(int size, int max)
 {
 	//for wall-up i must be a sphere with total-mass, torq in air and in stand, and with force in air
-    dBodyGetRelPointVel(body,0,0,0,pointrelvel);
+    if(body) dBodyGetRelPointVel(body,0,0,0,pointrelvel);
 //	const dReal *tr = dBodyGetTorque(body);
 
     if (up) //in up
@@ -268,16 +268,10 @@ void base::passive_control(void)
 
 void base::active_square_render (void)
 { //with frame-animation, but without set-type img
-	int *gb;
-	if (body){
-		gb = (int*) dBodyGetData (body);
-//		printf("GET %i\n", (int*)gb);
-		if (gb <= (int*) 1000 ) printf("DEAD\n");
-	}
 
 	
 	if(body) odepos=dBodyGetPosition(body);
-	else odepos=dGeomGetPosition(geom);
+	else if(geom) odepos=dGeomGetPosition(geom);
 	x=odepos[0]-texture[last].w/2; //is it needed?
 	y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
 	
@@ -290,7 +284,7 @@ void base::active_square_render (void)
 	glTranslated(-translated_val, 0, 0);
 	glScalef(-(float)1/texture[last].n, 1.0f, 1.0f);
 	invers----------------------------- */
-	
+//here set dead-texture	
 	glBindTexture( GL_TEXTURE_2D, texture[last].texture );
 	
 	glMatrixMode(GL_MODELVIEW);
@@ -323,7 +317,20 @@ void base::active_square_render (void)
 		glVertex3f( 0.f, texture[last].h, 0.f );
 	glEnd();
 	if(body)hack_2d();
-
+	int *gb;
+	if (body){
+		gb = (int*) dBodyGetData (body);
+//		printf("GET %i\n", (int*)gb);
+		if (gb <= (int*) 1000 ){
+			printf("DEAD\n");
+			if(!bitd){
+				dBodyDestroy(body);
+				dGeomDestroy(geom);
+				bitd=1;
+			}
+		}
+	}
+	
 }
 
 void base::passive_square_render (void)
@@ -389,7 +396,7 @@ void base::passive_square_render (void)
 
 short base::check_state(void)
 {
-	dBodyGetRelPointVel (body, 0, 0, 0, pointrelvel);
+	if(body) dBodyGetRelPointVel (body, 0, 0, 0, pointrelvel);
 	if (pointrelvel[1] > -1 && pointrelvel[1] < 1)
 	{
 		stand++;	
@@ -399,7 +406,7 @@ short base::check_state(void)
 	}
 	else stand=0;
 
-	dBodyGetRelPointVel(body,0,0,0,pointrelvel);
+	if(body) dBodyGetRelPointVel(body,0,0,0,pointrelvel);
 	if (pointrelvel[1] > 1 || pointrelvel[1] < -1)
 	{
 		fly++;

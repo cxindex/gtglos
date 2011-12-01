@@ -9,6 +9,8 @@ public:
 	float calc_speed; //for calc
 	short last, up;	//last status. 0 standl ,1 standr, 2l,3r
 	float rotate_angle;
+	static int bitd;
+
 	
 	//ode
 	dBodyID body;	
