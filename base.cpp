@@ -98,25 +98,22 @@ void base::move(int size, int max)
     if(body) dBodyGetRelPointVel(body,0,0,0,pointrelvel);
 //	const dReal *tr = dBodyGetTorque(body);
 
-    if (up) //in up
-    {
+    if (up){ //in up
 		if (size > 0 && pointrelvel[0]<max) dBodyAddForce (body,size/10,0,0);
 //		if (size > 0 && pointrelvel[0]<max) dBodyAddTorque (body,size/4, 0, 0);
 		else if (size < 0 && pointrelvel[0]>-max) dBodyAddForce (body,size/10,0,0);
 //		else if (size < 0 && pointrelvel[0]>-max) dBodyAddTorque (body,size,0,0);
 	}
 	
-	else
-	{
+	else{
 	if (size > 0 && pointrelvel[0] < max) {
 		dBodyAddForce (body,size,0,0);
 //		dBodyAddRelTorque (body, 0, 0, -size*60);
-	}
-		
-		else if (size < 0 && pointrelvel[0] > -max) {
-			dBodyAddForce (body,size,0,0);
+	}		
+	else if (size < 0 && pointrelvel[0] > -max) {
+		dBodyAddForce (body,size,0,0);
 //			dBodyAddTorque (body, 0, 0, -size*60);
-		}
+	}
 
     //~ if (up) //in up
     //~ {
@@ -135,53 +132,48 @@ void base::move(int size, int max)
 //all keyboard processing
 void base::active_control(void)
 {
-if(!bitd){
 	const dReal *odepos;
 	static int wj;
 	static int dj;
-	if(keystates['d'])
-	{
+if(bitd!=2){		
+	if(keystates['d']){
 		move(20, 80);
-		//~ dBodySetForce(body, -60, 0, 0);
 		last=RIGHT;
 		if(keystates['c'])
 			dBodyAddRelForce(body,-100,0,0);
 	}
-	if(keystates['a'])
-	{
-		//~ move(-15,60);
+	
+	if(keystates['a']){
 		move(-20, 80);
-
 		last=LEFT;
 		if(keystates['z'])
 			dBodyAddRelForce(body,100,0,0);
 	}
-	if(keystates[' '])
-	{
+	
+	if(keystates[' ']){
 		up=check_state();
-		if (up==0)
-		{
+		if (up==0){
 			dBodyAddForce(body,0.0,40.0,0.0);	//if stand
 			wj=0;		//can wj
 			dj=0;		//can dj
 		}
 		
-		if ((last==UL1 || last==UR1) && !wj)
-		{
+		if ((last==UL1 || last==UR1) && !wj){
 			if(last==UL1) dBodyAddForce(body,10.0,200.0,0.0);		//from wall
 			else if(last==UR1) dBodyAddForce(body,-10.0,200.0,0.0);		//from wall
 			printf("SSSS\n");
-
 //			wj=1;
 		}
-		else if (up==2 && !dj)
-		{
+		else if (up==2 && !dj){
 //			dBodyAddForce(body,0.0,180.0,0.0);		//for dj
 			dj=1;
 		}
 	}
 	//---------------------------------
+
+
 	float tmp;
+
 	up=check_state();
 	dBodyGetRelPointVel(body,0,0,0,pointrelvel); //get body's speed
 	if(last>1 && !up) tmp=pointrelvel[0]/speed;
@@ -191,10 +183,8 @@ if(!bitd){
 	if(tmp>=0)calc_speed+=tmp;
 	else calc_speed+=(tmp*-1);
 	
-	if(up)
-	{
-		char *pd = (char*) dGeomGetData (geom);
-						
+	if(up){
+		char *pd = (char*) dGeomGetData (geom);					
 		if(last==UP || last==LEFT || last==UL1)
 			if(pd == (char *)'1' && keystates['a'] && pointrelvel[0] > -1 && pointrelvel[0] < 1){
 				last=UL1;
@@ -214,8 +204,7 @@ if(!bitd){
 	if(pointrelvel[0]<=1 && pointrelvel[0]>=-1 && !up) //stand animation
 		if(last!=0 && last!=1) last-=2;
 	
-	if(calc_speed>=1)
-	{
+	if(calc_speed>=1){
 		translated_val+=(double)1/texture[last].n;
 		calc_speed=0;
 	}
@@ -223,9 +212,8 @@ if(!bitd){
 	if(last_prev!=last) translated_val=0;
 	last_prev=last;
 
-		//~ hack_2d();
 	dGeomSetData (geom, (void*)'0');
-}	
+}
 }
 
 void base::passive_control(void)
@@ -269,27 +257,27 @@ void base::passive_control(void)
 
 void base::active_square_render (void)
 { //with frame-animation, but without set-type img
+	//0 alive, 1 - dead, nocontrol, 2 -  delete
 	int *gb;
 	if (!bitd){
-
 		gb = (int*) dBodyGetData (body);
 //		printf("GET %i\n", (int*)gb);
-		if (gb <= (int*) 1000 && gb != (int*) 0 ){
+		if (gb <= (int*) 1900 && gb != (int*) 0 ){
 			printf("DEAD\n");
-			if(!bitd){
-//				dBodyDestroy(body);
-//				dGeomDestroy(geom);
-				bitd=1;
-			}
+			if(!bitd) bitd=1;
 		}
-	} else {
-		last=DL;
-		translated_val=0;
+	} else last=DL, translated_val=0;
+
+	if(bitd==1 && !up){
+		dBodyDestroy(body);
+		dGeomDestroy(geom);
+		printf("DESTROY\n");
+		bitd=2;
 	}
 	
 	if(body) odepos=dBodyGetPosition(body);
 	else if(geom) odepos=dGeomGetPosition(geom);
-	
+
 	x=odepos[0]-texture[last].w/2; //is it needed?
 	y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
 	
@@ -336,7 +324,7 @@ void base::active_square_render (void)
 		glTexCoord2i( 0,0 );
 		glVertex3f( 0.f, texture[last].h, 0.f );
 	glEnd();
-	if(body)hack_2d();
+	if(body && bitd!=2)hack_2d();
 }
 
 void base::passive_square_render (void)
