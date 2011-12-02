@@ -275,12 +275,13 @@ void base::active_square_render (void)
 		bitd=2;
 	}
 	
-	if(body) odepos=dBodyGetPosition(body);
-	else if(geom) odepos=dGeomGetPosition(geom);
+	if(bitd!=2){
+		if(body) odepos=dBodyGetPosition(body);
+		else if(geom) odepos=dGeomGetPosition(geom);
 
-	x=odepos[0]-texture[last].w/2; //is it needed?
-	y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
-	
+		x=odepos[0]-texture[last].w/2; //is it needed?
+		y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
+	}
 
 	
 	glMatrixMode(GL_TEXTURE);
