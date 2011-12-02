@@ -135,6 +135,8 @@ void base::active_control(void)
 	const dReal *odepos;
 	static int wj;
 	static int dj;
+	static int wstate;
+
 if(bitd!=2){		
 	if(keystates['d']){
 		move(20, 80);
@@ -156,13 +158,21 @@ if(bitd!=2){
 			dBodyAddForce(body,0.0,40.0,0.0);	//if stand
 			wj=0;		//can wj
 			dj=0;		//can dj
+			wstate=last;
 		}
 		
 		if ((last==UL1 || last==UR1) && !wj){
-			if(last==UL1) dBodyAddForce(body,10.0,200.0,0.0);		//from wall
-			else if(last==UR1) dBodyAddForce(body,-10.0,200.0,0.0);		//from wall
+			wj=1;
+			if(last==UL1 && wstate!=UL1){
+				dBodyAddForce(body,10.0,200.0,0.0);		//from wall
+				wj=0;
+			}
+			else if(last==UR1 && wstate!=UR1){
+				dBodyAddForce(body,-10.0,200.0,0.0);		//from wall
+				wj=0;
+			}
 			printf("SSSS\n");
-//			wj=1;
+			wstate=last;
 		}
 		else if (up==2 && !dj){
 //			dBodyAddForce(body,0.0,180.0,0.0);		//for dj
