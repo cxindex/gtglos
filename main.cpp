@@ -35,7 +35,11 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	if (b1)	gb = (int*) dBodyGetData (b1);
 	int *gb1;
 	if (b2) gb1 = (int*) dBodyGetData (b2);
-	
+
+	dVector3 pr1;
+	if(b1)dBodyGetRelPointVel(b1,0,0,0,pr1);
+	dVector3 pr2;
+	if(b2)dBodyGetRelPointVel(b2,0,0,0,pr2);
 	
 	dContact contact[MAX_CONTACTS];   // up to MAX_CONTACTS contacts per box-box
 	for (i=0; i<MAX_CONTACTS; i++)
@@ -71,13 +75,15 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 			
 	    }
 		float depth = contact[0].geom.depth;
-		if (depth != 10 && depth >= 4 && gb >= (int*)1000)
+		if (depth != 10 && depth >= 1 && gb >= (int*)1000)
 		{
-			if (b1){
+			if (b1 && (pr1[0] > 80 || pr1[0] < -80 || pr1[1] > 80 || pr1[1] < -80)){
 				dBodySetData(b1,(void*)((int*)gb - (int)depth));
 				printf("GB: %i\n", (int*)gb);
 			}
-			if (b2){
+//			if (b2){
+			if (b2 && (pr2[0] > 80 || pr2[0] < -80 || pr2[1] > 80 || pr2[1] < -80)){
+				
 				dBodySetData(b2,(void*)((int*)gb1 - (int)depth));
 //				printf("GB1: %i\n", (int*)gb1);
 			}
@@ -278,24 +284,22 @@ void keyboard_up_func(unsigned char key, int x, int y)
 void mouse_action(int button, int state, int x, int y)
 {
 	static int to;
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-	{
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 		hit(dBodyGetPosition(C_UNIT), x, y+y_shear_g);
 	}
 
-	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-	{
-	  dyn_array[to].body = dBodyCreate (world);
-	  dJointAttach (plane2d, dyn_array[to].body, 0);
-	  dyn_array[to].geom = dCreateBox (space, 60, 45, 10);
-	  dMassSetBoxTotal (&dyn_array[to].m,0.6,60,45,10); //work
-	  dyn_array[to].rotatebit=1;
-	  dyn_array[to].ode_init();
+	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
+		dyn_array[to].body = dBodyCreate (world);
+		dJointAttach (plane2d, dyn_array[to].body, 0);
+		dyn_array[to].geom = dCreateBox (space, 60, 45, 10);
+		dMassSetBoxTotal (&dyn_array[to].m,0.6,60,45,10); //work
+		dyn_array[to].rotatebit=1;
+		dyn_array[to].ode_init();
 
-	  dyn_array[to].img_load(60, 45, "block.bmp", 1, 0, 2);
-	  //why h_f_g? its top edge
-	  dyn_array[to].set_pos(x_shear_g+x, h_func_g-y);
-	  to++;
+		dyn_array[to].img_load(60, 45, "block.bmp", 1, 0, 2);
+		//why h_f_g? its top edge
+		dyn_array[to].set_pos(x_shear_g+x, h_func_g-y);
+		to++;
 	}
 }
 
@@ -412,3 +416,4 @@ int main (int argc, char **argv)
 	setup_rc();
 	glutMainLoop();
 }
+
