@@ -1,6 +1,6 @@
 #include "main.h"
 #include "base.h"
-
+//wut
 #define C_UNIT t1.body //control unit
 #define MAX_CONTACTS 17 //ode callback max cont
 extern void make_world_conf(const char *config_path, base *wall_array);
@@ -81,7 +81,6 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				dBodySetData(b1,(void*)((int*)gb - (int)depth));
 				printf("GB: %i\n", (int*)gb);
 			}
-//			if (b2){
 			if (b2 && (pr2[0] > 80 || pr2[0] < -80 || pr2[1] > 80 || pr2[1] < -80)){
 				
 				dBodySetData(b2,(void*)((int*)gb1 - (int)depth));
