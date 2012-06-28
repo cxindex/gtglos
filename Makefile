@@ -3,9 +3,12 @@ sTARGET=stat-bin.out
 TARGETW=bin.exe
 SDL_LIBS = `sdl-config --libs`
 SDL_CFLAGS = `sdl-config --cflags`
-ODE_LIBS = `ode-config --libs`
+#ODE_LIBS = `ode-config --libs`
+#ODE_LIBS = ./libode.so
+ODE_LIBS = 
 ODE_CFLAGS = `ode-config --cflags`
-CC = g++ -g
+CC = g++ -g -Wl,-R./ ./libode.so #example of link to shared-local
+#CC = g++ -g
 
 #~ sSDL_LIBS = /usr/lib/libSDL.a /usr/lib/libSDL_image.a  /usr/lib/libSDLmain.a  -ldl -lm -lpthread
 #~ sSDL_LIBS = /usr/lib/libSDL.a
@@ -26,7 +29,7 @@ all:
 
 	#~ $(CC) $(SDL_CFLAGS) $(SDL_LIBS) main.o base.o -o $(TARGET) -lGL -lSDL_image -lglut $(ODE_LIBS) $(ODE_CFLAGS) 
 	rm ./*.o
-	
+
 stat:
 	$(sCC) $(sSDL_CFLAGS)  -c utils.cpp -o utils.o $(sODE_LIBS) $(sODE_CFLAGS) 
 	$(sCC) $(sSDL_CFLAGS)  -c main.cpp -o main.o
@@ -42,6 +45,5 @@ w32:
 	#~ $(CCW) $(SDL_CFLAGS) $(SDL_LIBS) main.o base.o -o $(TARGETW) -lGL -lSDL_image -lglut $(ODE_LIBS) $(ODE_CFLAGS) 
 	$(CCW) $(SDL_CFLAGS) $(SDL_LIBS) main.o base.o -o $(TARGETW) -L/usr/lib/ -lGL.so -lSDL_image -lglut -L/usr/lib/libode.so $(ODE_CFLAGS) 
 	rm ./*.o
-	
  #~ i486-mingw32-gcc -o heat.exe heat.c matrix.c initial.c solver.c plotter.c args.c solution.c -lm 
 
