@@ -3,12 +3,12 @@ sTARGET=stat-bin.out
 TARGETW=bin.exe
 SDL_LIBS = `sdl-config --libs`
 SDL_CFLAGS = `sdl-config --cflags`
-#ODE_LIBS = `ode-config --libs`
+ODE_LIBS = `ode-config --libs`
 #ODE_LIBS = ./libode.so
-ODE_LIBS = 
+#ODE_LIBS = 
 ODE_CFLAGS = `ode-config --cflags`
-CC = g++ -g -Wl,-R./ ./libode.so #example of link to shared-local
-#CC = g++ -g
+#CC = g++ -g -Wl,-R./ ./libode.so #example of link to shared-local
+CC = g++ -g
 
 #~ sSDL_LIBS = /usr/lib/libSDL.a /usr/lib/libSDL_image.a  /usr/lib/libSDLmain.a  -ldl -lm -lpthread
 #~ sSDL_LIBS = /usr/lib/libSDL.a

@@ -7,7 +7,6 @@
 #include <SDL_image.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-//#include <limits.h> //wtf?
 #include <unistd.h>
 #include <time.h>
 #include <math.h>

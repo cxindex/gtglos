@@ -31,11 +31,10 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 	dBodyID b1 = dGeomGetBody(o1);
 	dBodyID b2 = dGeomGetBody(o2);
 	
-	int *gb;
+	int *gb, *gb1;
 	if (b1)	gb = (int*) dBodyGetData (b1);
-	int *gb1;
 	if (b2) gb1 = (int*) dBodyGetData (b2);
-
+	
 	dVector3 pr1;
 	if(b1)dBodyGetRelPointVel(b1,0,0,0,pr1);
 	dVector3 pr2;
@@ -82,9 +81,8 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
 				printf("GB: %i\n", (int*)gb);
 			}
 			if (b2 && (pr2[0] > 80 || pr2[0] < -80 || pr2[1] > 80 || pr2[1] < -80)){
-				
 				dBodySetData(b2,(void*)((int*)gb1 - (int)depth));
-//				printf("GB1: %i\n", (int*)gb1);
+				printf("GB1: %i\n", (int*)gb1);
 			}
 		}
 	}
@@ -142,9 +140,7 @@ void look_at(dBodyID body)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
 		if (scroll == 0) scroll = 4;
-		
-		 if((odepos[1])>h_func)
-		 	scroll=h_window-60;
+		if((odepos[1])>h_func)	scroll=h_window-60;
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -154,10 +150,7 @@ void look_at(dBodyID body)
 	{
 		scroll=fabsf(pointrelvel[1]/10);
 		if (scroll == 0) scroll = 4;
-
-		 if((odepos[1])<h_func-h_window)
-		 	scroll=h_window-60; //bottom edge
-
+		if((odepos[1])<h_func-h_window) scroll=h_window-60; //bottom edge
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(x_shear, w_func, y_shear-=scroll, h_func-=scroll, 100.0, -100.0);
@@ -252,7 +245,7 @@ void render_scene(void)
 	t1.active_square_render();
 	//приоритетные ниже
 	
-	static int i2=0;
+	static int i2;
 	i2=0;
 	while(i2!=5)
 	{

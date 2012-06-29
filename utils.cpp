@@ -7,8 +7,7 @@ void print_bitmap_string(void* font, char* s)
 	{
 		while (*s)
 		{
-			glutBitmapCharacter(font, *s);
-			s++;
+			glutBitmapCharacter(font, *s); s++;
 		}
 	}
 }
@@ -69,11 +68,9 @@ void make_world_conf(const char *config_path, base *wall_array)
 		return;
 	}
 
-	
 	config_setting_t *settings, *idx;
 	char path[200]="main.blocks.[0]";
 	int w,h, x,y; //tmp
-	//~ static int to=0;
 	
 	for ( int i=0; settings = config_lookup (&fc, path); i++ )
 	{
@@ -113,7 +110,6 @@ void make_world_conf(const char *config_path, base *wall_array)
 				y = config_setting_get_int (idx);
 				printf("Y:%i\n", y);
 				dGeomSetPosition (wall_array[i].geom, x, y, 0);
-
 				//~ wall_array[i].set_pos(x, y);
 			}
 			

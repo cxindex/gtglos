@@ -171,7 +171,7 @@ if(bitd!=2){
 				dBodyAddForce(body,-10.0,200.0,0.0);		//from wall
 				wj=0;
 			}
-			printf("SSSS\n");
+			printf("DJW\n");
 			wall_last=last;
 		}
 		else if (up==2 && !dj){
@@ -271,7 +271,6 @@ void base::active_square_render (void)
 	int *gb;
 	if (!bitd){
 		gb = (int*) dBodyGetData (body);
-//		printf("GET %i\n", (int*)gb);
 		if (gb <= (int*) 1900 && gb != (int*) 0 ){
 			printf("DEAD\n");
 			if(!bitd) bitd=1;
@@ -405,7 +404,7 @@ short base::check_state(void)
 	if (pointrelvel[1] > -1 && pointrelvel[1] < 1)
 	{
 		stand++;	
-		if (stand>=1 && c_tmp==0) Dup=1,c_tmp=1;		//if >=1 enable dj
+		if (stand>=1 && c_tmp==0) Dup=1, c_tmp=1;		//if >=1 enable dj
 		if (stand>=10) Tup=0, Dup=0, c_tmp=0;		//enable dj on floor //stand>=X --X time for set stand
 		if (Dup==1) Tup=2, Dup=0;
 	}
@@ -419,7 +418,6 @@ short base::check_state(void)
 		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
 	}
 	else fly=0;
-//test	
 	return Tup;	//1 - first j. 2- dj. 0 - floor
 }
 
@@ -457,7 +455,7 @@ void base::img_load (int _w, int _h, const char *str, int _n, short t_n, short t
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		// Edit the texture object's image data using the information SDL_Surface gives us
-		glTexImage2D( GL_TEXTURE_2D, 0, n_of_colors, surface->w, surface->h, 0,				//it do not allow color+texture
+		glTexImage2D( GL_TEXTURE_2D, 0, n_of_colors, surface->w, surface->h, 0,	//it does not allow color+texture
 		texture_format, GL_UNSIGNED_BYTE, surface->pixels );
 		switch(type)
 		{ //S == x; T == y;
