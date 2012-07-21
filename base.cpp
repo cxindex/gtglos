@@ -275,7 +275,10 @@ void base::active_square_render (void)
 			printf("DEAD\n");
 			if(!bitd) bitd=1;
 		}
-	} else last=DL, translated_val=0;
+	} else {
+		last=DL;
+		translated_val=0;
+	}
 
 	if(bitd==1 && !up){
 		dBodyDestroy(body);
@@ -291,7 +294,6 @@ void base::active_square_render (void)
 		x=odepos[0]-texture[last].w/2; //is it needed?
 		y=odepos[1]-texture[last].h/2; //here maybe some troubles with up
 	}
-
 	
 	glMatrixMode(GL_TEXTURE);
 	glLoadIdentity();
@@ -414,7 +416,6 @@ short base::check_state(void)
 	if (pointrelvel[1] > 1 || pointrelvel[1] < -1)
 	{
 		fly++;
-//		if (fly>=3) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
 		if (fly>=8) Tup=1, Dup=0; //fly>=X where X is time to keep not_jump state
 	}
 	else fly=0;
