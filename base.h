@@ -11,7 +11,6 @@ public:
 	float rotate_angle;
 	int bitd;
 
-	
 	//ode
 	dBodyID body;	
 	dGeomID geom;	
