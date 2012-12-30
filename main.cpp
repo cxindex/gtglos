@@ -1,3 +1,4 @@
+#define dDOUBLE
 #include "main.h"
 #include "base.h"
 //wut
